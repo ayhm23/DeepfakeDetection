@@ -1,0 +1,44 @@
+# Model weights
+*.pth
+*.pt
+*.h5
+*.ckpt
+*.weights
+*.pb
+*.onnx
+*.bin
+*.model
+weights/
+checkpoints/ 
+
+## Model Weights
+The model weights can be downloaded from [link to storage location].
+Place the downloaded weights in the `weights/` directory before running the model.
+
+# Videos
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.mkv
+*.webm
+
+# Training data folders
+training/
+train/
+dataset/
+data/
+videos/ 
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/ 

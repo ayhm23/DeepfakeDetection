@@ -1,0 +1,58 @@
+.face-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.face-image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+#loading {
+    min-height: 100px;
+}
+
+.prediction-score {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.faces-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.face-result {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.detected-face {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.face-prediction {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.face-prediction.fake {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.face-prediction.real {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+} 

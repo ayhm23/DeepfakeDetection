@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-purple': '#1A1425',
+                        'light-purple': '#B197FC',
+                        'medium-purple': '#7C3AED'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A1425;
+            background-image: url('/static/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            perspective: 1000px;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #B197FC 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transform: translateZ(20px);
+            text-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+        }
+        .drop-zone {
+            border: 2px dashed rgba(177, 151, 252, 0.3);
+            transition: all 0.3s ease;
+            transform: translateZ(10px);
+            box-shadow: 0 10px 30px -10px rgba(177, 151, 252, 0.2);
+        }
+        .drop-zone.dragover {
+            background: rgba(177, 151, 252, 0.1);
+            border-color: #B197FC;
+            transform: translateZ(20px);
+            box-shadow: 0 20px 40px -15px rgba(177, 151, 252, 0.3);
+        }
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+        }
+        .card-3d:hover {
+            transform: translateY(-5px) translateZ(10px);
+            box-shadow: 0 20px 40px -15px rgba(177, 151, 252, 0.3);
+        }
+        .button-3d {
+            transition: all 0.3s ease;
+            transform: translateZ(10px);
+            box-shadow: 0 10px 20px -5px rgba(177, 151, 252, 0.3);
+        }
+        .button-3d:hover {
+            transform: translateY(-2px) translateZ(20px);
+            box-shadow: 0 15px 30px -5px rgba(177, 151, 252, 0.4);
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        @keyframes rotate {
+            from { transform: rotate(-90deg); }
+            to { transform: rotate(270deg); }
+        }
+        #circular-progress {
+            transition: stroke-dashoffset 0.2s ease;
+            filter: drop-shadow(0 10px 15px rgba(177, 151, 252, 0.3));
+        }
+        /* Add an overlay to ensure text readability */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 20, 37, 0.75);
+            z-index: -1;
+        }
+        /* Adjust card backgrounds for better contrast with more visible background */
+        .bg-deep-purple\/50 {
+            background-color: rgba(26, 20, 37, 0.85) !important;
+            backdrop-filter: blur(10px);
+        }
+        .bg-\[\#1A1425\]\/70 {
+            background-color: rgba(26, 20, 37, 0.85) !important;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="p-6 relative transform-gpu">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold transform hover:scale-105 transition-transform">Startup Squad</h1>
+            <div class="space-x-6">
+                <a href="#" class="hover:text-light-purple transition transform hover:scale-105">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-20">
+        <div class="max-w-4xl mx-auto text-center transform-gpu">
+            <!-- Title Section -->
+            <h1 class="text-6xl font-bold gradient-text mb-6 transform hover:scale-105 transition-transform">Deepfake Detection</h1>
+            
+            <!-- Upload Section -->
+            <div class="bg-deep-purple/50 rounded-2xl p-16 card-3d" id="upload-section">
+                <p class="text-gray-400 text-xl mb-16 transform hover:translateZ(15px) transition-transform">
+                    Upload your video to detect potential deepfakes using advanced AI technology
+                </p>
+                <div class="drop-zone rounded-xl p-12 text-center cursor-pointer transform-gpu" id="drop-zone">
+                    <div class="space-y-8">
+                        <!-- Upload Icon -->
+                        <div class="mx-auto w-16 h-16 transform hover:scale-110 transition-transform">
+                            <svg class="w-full h-full text-light-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-gray-400">Drag and drop your video here or</p>
+                            <button class="button-3d bg-medium-purple text-white px-8 py-3 rounded-full 
+                                         hover:bg-light-purple transition duration-300">
+                                Browse Files
+                            </button>
+                        </div>
+                        <input type="file" id="file-input" class="hidden" accept="video/*">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Section (Hidden by default) -->
+            <div id="processing-section" class="hidden">
+                <div class="bg-deep-purple/50 rounded-2xl p-16 card-3d">
+                    <div class="flex flex-col items-center justify-center">
+                        <!-- Circular Progress -->
+                        <div class="relative w-48 h-48 transform hover:scale-105 transition-transform">
+                            <!-- Background Circle -->
+                            <div class="absolute inset-0 rounded-full border-4 border-deep-purple/30"></div>
+                            <!-- Progress Circle -->
+                            <svg class="absolute inset-0 w-full h-full -rotate-90">
+                                <circle id="circular-progress"
+                                    cx="96" cy="96" r="88"
+                                    stroke-width="4"
+                                    stroke="rgb(177, 151, 252)"
+                                    fill="none"
+                                    stroke-dasharray="553"
+                                    stroke-dashoffset="553"
+                                    class="transition-all duration-200 ease-linear"
+                                />
+                            </svg>
+                            <!-- Percentage Text -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span id="progress-text" class="text-2xl text-gray-400">0%</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl text-gray-400 mt-6 transform hover:translateZ(15px) transition-transform">Analysing...</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section (Hidden by default) -->
+            <div id="results-section" class="hidden">
+                <div class="bg-deep-purple/50 rounded-2xl p-16 card-3d">
+                    <h2 class="text-4xl font-bold gradient-text mb-8">Analysis Results</h2>
+                    
+                    <!-- Results Box -->
+                    <div class="bg-[#1A1425]/70 rounded-2xl p-8 mb-12 inline-block min-w-[400px] card-3d">
+                        <div class="text-2xl mb-3">Result: <span id="analysis-result" class="text-light-purple font-bold"></span></div>
+                        <div class="text-gray-400 mb-8">Confidence Score: <span id="confidence-score" class="text-light-purple"></span></div>
+                        
+                        <!-- Analyse Another Video Button -->
+                        <button onclick="resetUI()" 
+                                class="button-3d bg-medium-purple text-white px-8 py-3 rounded-full 
+                                       hover:bg-light-purple transition duration-300 font-medium">
+                            Analyse Another Video
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl text-gray-400 mb-6">Analyzed Frames</h3>
+                        <div class="faces-grid grid grid-cols-2 md:grid-cols-5 gap-4" id="faces-container">
+                            <!-- Face results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- About Me Section -->
+    <section id="about" class="container mx-auto px-4 py-20">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl font-bold gradient-text mb-12 text-center">About Us</h2>
+            
+            <!-- Team Members Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Team Member 1 -->
+                <div class="bg-deep-purple/50 rounded-2xl p-8 card-3d">
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <h3 class="text-xl font-bold text-light-purple mb-4">Archit Jaju</h3>
+                        <a href="https://www.linkedin.com/in/archit-jaju1/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center space-x-2 text-gray-400 hover:text-light-purple transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-.88-.016-2.005-1.223-2.005-1.222 0-1.409.953-1.409 1.937v5.672h-3v-11h2.95v1.544h.042c.469-.89 1.614-1.83 3.323-1.83 3.553 0 4.204 2.338 4.204 5.377v6.369z"/>
+                            </svg>
+                            <span>LinkedIn Profile</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="bg-deep-purple/50 rounded-2xl p-8 card-3d">
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <h3 class="text-xl font-bold text-light-purple mb-4">Sarthak Raj</h3>
+                        <a href="https://www.linkedin.com/in/sarthak-raj-6588b2309/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center space-x-2 text-gray-400 hover:text-light-purple transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-.88-.016-2.005-1.223-2.005-1.222 0-1.409.953-1.409 1.937v5.672h-3v-11h2.95v1.544h.042c.469-.89 1.614-1.83 3.323-1.83 3.553 0 4.204 2.338 4.204 5.377v6.369z"/>
+                            </svg>
+                            <span>LinkedIn Profile</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="bg-deep-purple/50 rounded-2xl p-8 card-3d">
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <h3 class="text-xl font-bold text-light-purple mb-4">Kunal Narang</h3>
+                        <a href="https://www.linkedin.com/in/kunal-narang-76816b18a/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center space-x-2 text-gray-400 hover:text-light-purple transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-.88-.016-2.005-1.223-2.005-1.222 0-1.409.953-1.409 1.937v5.672h-3v-11h2.95v1.544h.042c.469-.89 1.614-1.83 3.323-1.83 3.553 0 4.204 2.338 4.204 5.377v6.369z"/>
+                            </svg>
+                            <span>LinkedIn Profile</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 4 -->
+                <div class="bg-deep-purple/50 rounded-2xl p-8 card-3d">
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <h3 class="text-xl font-bold text-light-purple mb-4">Sanyam Verma</h3>
+                        <a href="https://linkedin.com/in/sanyam-verma1231" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center space-x-2 text-gray-400 hover:text-light-purple transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-.88-.016-2.005-1.223-2.005-1.222 0-1.409.953-1.409 1.937v5.672h-3v-11h2.95v1.544h.042c.469-.89 1.614-1.83 3.323-1.83 3.553 0 4.204 2.338 4.204 5.377v6.369z"/>
+                            </svg>
+                            <span>LinkedIn Profile</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Information -->
+            <div class="mt-16 bg-deep-purple/50 rounded-2xl p-8 card-3d">
+                <h3 class="text-2xl font-bold gradient-text mb-6 text-center">Model Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="text-center">
+                        <h4 class="text-xl text-light-purple mb-4">Model Architecture</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li>Base Model: EfficientNet-B7 (Noisy Student)</li>
+                            <li>Input Size: 380×380 pixels</li>
+                            <li>Precision: Half-precision (FP16)</li>
+                            <li>Ensemble Method: Weighted average</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-xl text-light-purple mb-4">Key Features</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li>Multi-frame analysis</li>
+                            <li>Face-specific feature extraction</li>
+                            <li>Confidence scoring</li>
+                            <li>Ensemble prediction</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        const processingSection = document.getElementById('processing-section');
+        const resultsSection = document.getElementById('results-section');
+        const progressBar = document.getElementById('progress-bar');
+        const facesContainer = document.getElementById('faces-container');
+
+        // Drag and drop handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('dragover');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect, false);
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('video/')) {
+                    uploadAndProcessVideo(file);
+                } else {
+                    alert('Please upload a video file');
+                }
+            }
+        }
+
+        function updateProgress(progress) {
+            const circle = document.getElementById('circular-progress');
+            const progressText = document.getElementById('progress-text');
+            
+            // Update percentage text
+            progressText.textContent = `${progress}%`;
+            
+            // Calculate the stroke-dashoffset based on progress
+            // Circle circumference is 2 * π * r = 2 * 3.14159 * 88 ≈ 553
+            const circumference = 553;
+            const offset = circumference - (progress / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function uploadAndProcessVideo(file) {
+            const formData = new FormData();
+            formData.append('video', file);
+
+            uploadSection.classList.add('hidden');
+            processingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                if (progress > 90) clearInterval(progressInterval);
+                updateProgress(progress);
+            }, 200);
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                updateProgress(100);
+                
+                setTimeout(() => {
+                    processingSection.classList.add('hidden');
+                    displayResults(data);
+                }, 500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the video');
+                resetUI();
+            });
+        }
+
+        function displayResults(data) {
+            resultsSection.classList.remove('hidden');
+            
+            // Calculate the prediction percentage
+            const confidencePercent = (data.overall_prediction * 100).toFixed(1);
+            const isReal = data.overall_prediction <= 0.5;
+            
+            // Update the analysis result and confidence score
+            document.getElementById('analysis-result').textContent = isReal ? 'REAL' : 'FAKE';
+            document.getElementById('confidence-score').textContent = `${confidencePercent}%`;
+
+            // Display individual faces that match the overall prediction (limit to 10)
+            facesContainer.innerHTML = '';
+            const matchingFaces = data.faces_data.filter(face => face.is_fake === !isReal);
+            const facesToShow = matchingFaces.slice(0, 10);
+            
+            if (facesToShow.length === 0) {
+                const noFramesElement = document.createElement('div');
+                noFramesElement.className = 'col-span-5 text-gray-400 text-xl py-8 transform hover:translateZ(15px) transition-transform';
+                noFramesElement.textContent = `No ${isReal ? 'real' : 'fake'} frames detected in the video`;
+                facesContainer.appendChild(noFramesElement);
+            } else {
+                facesToShow.forEach((face, index) => {
+                    const confidence = (face.prediction * 100).toFixed(1);
+                    const faceElement = document.createElement('div');
+                    faceElement.className = 'face-result text-center card-3d p-3 rounded-lg';
+                    faceElement.innerHTML = `
+                        <img src="data:image/jpeg;base64,${face.face}" 
+                             class="w-full aspect-square object-cover rounded-lg mb-2">
+                        <div class="text-light-purple font-medium">
+                            ${face.is_fake ? 'FAKE' : 'REAL'}
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            ${confidence}% confidence
+                        </div>
+                    `;
+                    facesContainer.appendChild(faceElement);
+                });
+            }
+        }
+
+        function resetUI() {
+            uploadSection.classList.remove('hidden');
+            processingSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            fileInput.value = '';
+            facesContainer.innerHTML = '';
+        }
+    </script>
+</body>
+</html> 

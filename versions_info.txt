@@ -1,0 +1,18 @@
+System Information:
+--------------------------------------------------
+Python version: 3.10.0
+CUDA available: True
+CUDA version: 11.8
+GPU: NVIDIA GeForce RTX 3050 Laptop GPU
+
+Package Versions:
+--------------------------------------------------
+torch==2.6.0+cu118
+torchvision==0.21.0+cu118
+numpy==1.23.5
+opencv-python==4.8.0.74
+timm==0.4.12
+Pillow==9.5.0
+tqdm==4.67.1
+scikit-learn==1.2.2
+albumentations==1.1.0
