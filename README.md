@@ -38,13 +38,13 @@ deepfake-detection-web/
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/ayhm23/DeepfakeDetection.git
 cd deepfake-detection-web
 ```
 
 2. Create a virtual environment (recommended):
 ```bash
-python -m venv venv
+python -m venv venv        # use python3.10
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
@@ -54,6 +54,7 @@ pip install -r requirements.txt
 ```
 
 4. Download model weights:
+https://1drv.ms/f/c/363bbf1f20a036e0/EqGZ9V7lFShHq6as6BE-DpEBuEQlHPKBC60Njc5riYWuoA?e=lVADuK
 Place the DeepFakeClassifier model weights in the `weights/` directory.
 
 ## Usage
